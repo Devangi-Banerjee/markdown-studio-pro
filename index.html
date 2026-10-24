@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Markdown Studio Pro — a real-time Markdown note-taking workspace with live preview and Markdown/HTML export." />
+  <title>Markdown Studio Pro</title>
+  <script>
+    /* Apply the saved (or system) theme before first paint to avoid a flash of the wrong theme. */
+    (function () {
+      try {
+        var stored = localStorage.getItem("markdownStudioProThemeV1");
+        var theme = stored === "light" || stored === "dark"
+          ? stored
+          : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (err) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234F46E5'/%3E%3Cpath d='M6.5 22.5V9.5h3.2l3.8 5.4 3.8-5.4h3.2v13h-3.2v-7.6l-3.8 5.2-3.8-5.2v7.6H6.5z' fill='white'/%3E%3Cpath d='M24 13v6' stroke='white' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M21.6 17.2 24 19.8l2.4-2.6' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <!-- Inline SVG icon sprite (lucide-style strokes) -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="sprite" aria-hidden="true">
+    <symbol id="icon-panel-left" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
+    <symbol id="icon-columns" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></symbol>
+    <symbol id="icon-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></symbol>
+    <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+    <symbol id="icon-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="icon-more" viewBox="0 0 24 24"><path d="M12 12h.01M8 12h.01M16 12h.01"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="icon-pen" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+    <symbol id="icon-heading" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></symbol>
+    <symbol id="icon-bold" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 0 8H6z"/><path d="M6 12h9a4 4 0 0 1 0 8H6z"/></symbol>
+    <symbol id="icon-italic" viewBox="0 0 24 24"><path d="M19 4h-9M14 20H5M15 4 9 20"/></symbol>
+    <symbol id="icon-strike" viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M8 6a4 4 0 0 1 8 0"/><path d="M16 18a4 4 0 0 1-8 0"/></symbol>
+    <symbol id="icon-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="icon-list-ordered" viewBox="0 0 24 24"><path d="M10 6h11M10 12h11M10 18h11"/><path d="M4 12h1.5c.8 0 1.5-.7 1.5-1.5S6.3 9 5.5 9c-.4 0-.8.2-1 .4L4 9.7"/><path d="M4 17.5c.3-.3.8-.5 1.3-.5.8 0 1.2.5 1.2 1s-.4.8-1 1.3L4 20h3"/></symbol>
+    <symbol id="icon-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+    <symbol id="icon-quote" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M9.8 7.2c-2.4.6-4 2.6-4 5.3v4.3H11v-5.2H8.1c0-1.6.7-2.7 2.3-3.3l-.6-1.1zm8 0c-2.4.6-4 2.6-4 5.3v4.3h5.3v-5.2h-2.9c0-1.6.7-2.7 2.3-3.3l-.7-1.1z"/></symbol>
+    <symbol id="icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  </svg>
+
+  <div class="app" id="app" data-layout="split" data-sidebar="open" data-testid="app-root">
+    <a class="skip-link" href="#markdownInput">Skip to editor</a>
+
+    <!-- ============ TOP NAVIGATION BAR ============ -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="sidebarToggle" class="icon-button" type="button" data-testid="sidebar-toggle-button" aria-label="Toggle notes sidebar" aria-expanded="true" title="Toggle notes sidebar">
+          <svg class="icon"><use href="#icon-panel-left"/></svg>
+        </button>
+        <a class="brand" href="index.html" aria-label="Markdown Studio Pro">
+          <span class="brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="18" height="18"><rect width="32" height="32" rx="7" fill="currentColor"/><path d="M6.5 22.5V9.5h3.2l3.8 5.4 3.8-5.4h3.2v13h-3.2v-7.6l-3.8 5.2-3.8-5.2v7.6H6.5z" fill="#fff"/><path d="M24 13v6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M21.6 17.2 24 19.8l2.4-2.6" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="brand-name">Markdown Studio Pro</span>
+        </a>
+      </div>
+
+      <div class="topbar-center">
+        <button id="noteTitleButton" class="note-title-button" type="button" data-testid="note-title-button" aria-label="Rename note" title="Rename note">
+          <span id="noteTitleText">Untitled note</span>
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-pen"/></svg>
+        </button>
+        <input id="noteTitleInput" class="note-title-input" data-testid="note-title-input" type="text" maxlength="80" aria-label="Note title" hidden />
+        <span id="saveStatusChip" class="save-chip is-saved" data-testid="save-status-chip" role="status" aria-live="polite">
+          <span class="save-dot" aria-hidden="true"></span>
+          <span id="saveStatusText">Saved</span>
+        </span>
+      </div>
+
+      <div class="topbar-right">
+        <div class="segmented" role="group" aria-label="Preview layout" data-testid="layout-switcher">
+          <button id="layoutSplit" class="segmented-button is-active" type="button" data-testid="layout-split-button" aria-pressed="true" aria-label="Split view" title="Split view">
+            <svg class="icon"><use href="#icon-columns"/></svg>
+          </button>
+          <button id="layoutEditor" class="segmented-button" type="button" data-testid="layout-editor-button" aria-pressed="false" aria-label="Editor only" title="Editor only">
+            <svg class="icon"><use href="#icon-file-text"/></svg>
+          </button>
+          <button id="layoutPreview" class="segmented-button" type="button" data-testid="layout-preview-button" aria-pressed="false" aria-label="Preview only" title="Preview only">
+            <svg class="icon"><use href="#icon-eye"/></svg>
+          </button>
+        </div>
+
+        <button id="themeToggle" class="icon-button" type="button" data-testid="theme-toggle-button" aria-label="Switch theme" title="Switch theme">
+          <svg class="icon theme-icon-sun" aria-hidden="true"><use href="#icon-sun"/></svg>
+          <svg class="icon theme-icon-moon" aria-hidden="true"><use href="#icon-moon"/></svg>
+        </button>
+
+        <button id="saveNoteButton" class="primary-button" type="button" data-testid="save-note-button" title="Save note (Ctrl+S)">
+          <svg class="icon" aria-hidden="true"><use href="#icon-save"/></svg>
+          <span class="label-long">Save note</span>
+          <span class="label-short">Save</span>
+        </button>
+
+        <div class="dropdown">
+          <button id="exportButton" class="secondary-button" type="button" data-testid="export-menu-button" aria-haspopup="true" aria-expanded="false" title="Export">
+            <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>
+            <span class="export-label">Export</span>
+            <svg class="icon icon-sm" aria-hidden="true"><use href="#icon-chevron"/></svg>
+          </button>
+          <div id="exportMenu" class="menu menu-right" role="menu" aria-label="Export options" hidden>
+            <button class="menu-item" type="button" role="menuitem" id="exportMarkdownItem" data-testid="export-markdown-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>Download as Markdown (.md)
+            </button>
+            <button class="menu-item" type="button" role="menuitem" id="exportHtmlItem" data-testid="export-html-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>Download as HTML (.html)
+            </button>
+            <hr class="menu-divider" />
+            <a class="menu-item" role="menuitem" id="downloadZipItem" data-testid="download-source-item" href="../markdown-studio-pro.zip" download="markdown-studio-pro.zip">
+              <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>Download source code (.zip)
+            </a>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button id="moreButton" class="icon-button" type="button" data-testid="more-menu-button" aria-haspopup="true" aria-expanded="false" aria-label="More actions" title="More actions">
+            <svg class="icon" aria-hidden="true"><use href="#icon-more"/></svg>
+          </button>
+          <div id="moreMenu" class="menu menu-right" role="menu" aria-label="More actions" hidden>
+            <button class="menu-item" type="button" role="menuitem" id="newNoteItem" data-testid="new-note-menu-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg>New note
+            </button>
+            <button class="menu-item" type="button" role="menuitem" id="insertSampleItem" data-testid="insert-sample-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-file-text"/></svg>Insert sample note
+            </button>
+            <button class="menu-item" type="button" role="menuitem" id="renameItem" data-testid="rename-note-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-pen"/></svg>Rename note
+            </button>
+            <button class="menu-item" type="button" role="menuitem" id="clearItem" data-testid="clear-editor-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-panel-left"/></svg>Clear editor
+            </button>
+            <button class="menu-item is-danger" type="button" role="menuitem" id="deleteItem" data-testid="delete-note-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-more"/></svg>Delete note
+            </button>
+            <hr class="menu-divider" />
+            <button class="menu-item" type="button" role="menuitem" id="shortcutsItem" data-testid="shortcuts-item">
+              <svg class="icon" aria-hidden="true"><use href="#icon-code"/></svg>Keyboard shortcuts
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ SIDEBAR + WORKSPACE ============ -->
+    <div class="app-body">
+      <aside id="sidebar" class="sidebar" data-testid="notes-sidebar" aria-label="Saved notes">
+        <div class="sidebar-header">
+          <h2 class="sidebar-heading">Notes</h2>
+          <button id="newNoteButton" class="ghost-button" type="button" data-testid="new-note-button" title="Create a new note">
+            <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg>
+            <span>New note</span>
+          </button>
+        </div>
+        <ul id="notesList" class="notes-list" data-testid="notes-list"></ul>
+        <p id="sidebarEmpty" class="sidebar-empty" hidden>No notes yet. Create one to get started.</p>
+      </aside>
+      <div id="sidebarBackdrop" class="sidebar-backdrop" data-testid="sidebar-backdrop" hidden></div>
+
+      <main class="workspace">
+        <!-- Compact formatting toolbar -->
+        <div class="toolbar" role="toolbar" aria-label="Markdown formatting" data-testid="formatting-toolbar">
+          <button class="toolbar-button" type="button" data-action="heading" data-testid="toolbar-heading" aria-label="Toggle heading on selected lines" title="Heading">
+            <svg class="icon" aria-hidden="true"><use href="#icon-heading"/></svg>
+          </button>
+          <button class="toolbar-button" type="button" data-action="bold" data-testid="toolbar-bold" aria-label="Bold (Ctrl+B)" title="Bold (Ctrl+B)">
+            <svg class="icon" aria-hidden="true"><use href="#icon-bold"/></svg>
+          </button>
+          <button class="toolbar-button" type="button" data-action="italic" data-testid="toolbar-italic" aria-label="Italic (Ctrl+I)" title="Italic (Ctrl+I)">
+            <svg class="icon" aria-hidden="true"><use href="#icon-italic"/></svg>
+          </button>
+          <button class="toolbar-button" type="button" data-action="strike" data-testid="toolbar-strike" aria-label="Strikethrough" title="Strikethrough">
+            <svg class="icon" aria-hidden="true"><use href="#icon-strike"/></svg>
+          </button>
+          <span class="toolbar-sep" aria-hidden="true"></span>
+          <button class="toolbar-button" type="button" data-action="ul" data-testid="toolbar-ul" aria-label="Unordered list" title="Unordered list">
+            <svg class="icon" aria-hidden="true"><use href="#icon-list"/></svg>
+          </button>
+          <button class="toolbar-button" type="button" data-action="ol" data-testid="toolbar-ol" aria-label="Ordered list" title="Ordered list">
+            <svg class="icon" aria-hidden="true"><use href="#icon-list-ordered"/></svg>
+          </button>
+          <button class="toolbar-button" type="button" data-action="quote" data-testid="toolbar-quote" aria-label="Blockquote" title="Blockquote">
+            <svg class="icon" aria-hidden="true"><use href="#icon-quote"/></svg>
+          </button>
+          <span class="toolbar-sep" aria-hidden="true"></span>
+          <button class="toolbar-button" type="button" data-action="code" data-testid="toolbar-code" aria-label="Inline code" title="Inline code">
+            <svg class="icon" aria-hidden="true"><use href="#icon-code"/></svg>
+          </button>
+          <button class="toolbar-button" type="button" data-action="link" data-testid="toolbar-link" aria-label="Insert link" title="Insert link">
+            <svg class="icon" aria-hidden="true"><use href="#icon-link"/></svg>
+          </button>
+        </div>
+
+        <!-- Split-screen workspace: real textarea + real preview div -->
+        <div class="panes" id="panes" data-testid="panes">
+          <section class="pane editor-pane" aria-label="Markdown editor">
+            <div class="pane-header">
+              <span class="pane-label">Markdown Editor</span>
+            </div>
+            <textarea id="markdownInput" data-testid="markdown-editor" class="editor-textarea"
+              placeholder="# Start writing…&#10;&#10;Write Markdown here — the preview on the right updates as you type.&#10;&#10;- **bold**, *italic*, ~~strikethrough~~&#10;- `inline code` and fenced code blocks&#10;- [links](https://example.com) and blockquotes"
+              spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+          </section>
+
+          <div class="pane-divider" aria-hidden="true"></div>
+
+          <section class="pane preview-pane" aria-label="Rendered preview">
+            <div class="pane-header">
+              <span class="pane-label">Preview</span>
+            </div>
+            <div id="previewOutput" data-testid="preview-output" class="preview-body"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- ============ STATUS BAR ============ -->
+    <footer class="statusbar" data-testid="status-bar">
+      <div class="statusbar-left">
+        <span id="wordCount" data-testid="word-count">Words: 0</span>
+        <span class="status-sep" aria-hidden="true">|</span>
+        <span id="charCount" data-testid="character-count">Characters: 0</span>
+        <span class="status-sep" aria-hidden="true">|</span>
+        <span id="lineCount" data-testid="line-count">Lines: 0</span>
+      </div>
+      <div class="statusbar-right">
+        <span id="statusbarSaveState" data-testid="statusbar-save-state">Saved</span>
+        <span class="status-sep" aria-hidden="true">|</span>
+        <span title="Notes are stored in this browser only — there is no cloud sync">Stored locally</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============ DIALOGS ============ -->
+  <dialog id="confirmDialog" class="dialog" data-testid="confirm-dialog" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+    <form method="dialog" class="dialog-form">
+      <h3 id="confirmTitle" class="dialog-title" data-testid="confirm-dialog-title">Are you sure?</h3>
+      <p id="confirmMessage" class="dialog-message" data-testid="confirm-dialog-message"></p>
+      <div class="dialog-actions">
+        <button type="submit" value="cancel" id="confirmCancelButton" class="secondary-button" data-testid="confirm-cancel-button">Cancel</button>
+        <button type="submit" value="ok" id="confirmOkButton" class="danger-button" data-testid="confirm-ok-button">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="shortcutsDialog" class="dialog" data-testid="shortcuts-dialog" aria-labelledby="shortcutsTitle">
+    <div class="dialog-form">
+      <h3 id="shortcutsTitle" class="dialog-title">Keyboard shortcuts</h3>
+      <ul class="shortcut-list">
+        <li><span><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>S</kbd></span><span>Save the current note</span></li>
+        <li><span><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>B</kbd></span><span>Bold the selection</span></li>
+        <li><span><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>I</kbd></span><span>Italicize the selection</span></li>
+      </ul>
+      <div class="dialog-actions">
+        <button type="button" id="shortcutsCloseButton" class="secondary-button" data-testid="shortcuts-close-button">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ============ TOASTS ============ -->
+  <div id="toastRegion" class="toast-region" data-testid="toast-region" aria-live="polite"></div>
+
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

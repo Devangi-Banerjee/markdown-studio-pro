@@ -1,0 +1,17 @@
+{
+  "name": "markdown-studio-pro",
+  "version": "1.0.0",
+  "description": "A real-time Markdown note-taking workspace with live preview, multiple notes, localStorage persistence, and Markdown/HTML export. Plain HTML, CSS and JavaScript — no build step.",
+  "scripts": {
+    "start": "npx --yes serve -l 3000 ."
+  },
+  "keywords": [
+    "markdown",
+    "notes",
+    "editor",
+    "live-preview",
+    "vanilla-javascript",
+    "localstorage"
+  ],
+  "license": "MIT"
+}
